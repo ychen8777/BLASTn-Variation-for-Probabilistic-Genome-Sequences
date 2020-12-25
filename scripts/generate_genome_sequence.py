@@ -70,6 +70,16 @@ def main():
     # print("length", seq_length)
     # print(output_file)
 
+    with open(fasta_file) as f_file:
+        sequence_db = f_file.readline()
+
+    with open(prob_file) as p_file:
+        probability = p_file.readline().split()
+
+    nucleotides = set(list(sequence_db))
+    prob_db = create_prob(sequence_db, probability, nucleotides)
+
+    print(len(sequence_db), len(prob_db))    
 
 
 if __name__ == '__main__':
