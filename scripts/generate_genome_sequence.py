@@ -8,13 +8,31 @@ and store in output_file:
   number of genome sequences to be generated
   length of each genome sequence
   path to output file containing the generated sequences
+
+If the number or length is not given, 100 sequences of length 100 will be genreted.
+
 '''
 
 import random
 import argparse
 from pathlib import Path
 
+def create_prob(sequence_db, probability, nucleotides):
+    prob_db = []
 
+    for i in range(len(sequence_db)):
+        pred_nuc = sequence_db[i]
+        confidence = float(probability[i])
+
+        probs ={pred_nuc:confidence}
+        other_confidence = (1-confidence) / (len(nucleotides) - 1)
+        for nuc in nucleotides:
+            if nuc not in probs:
+                probs[nuc] = other_confidence
+
+        prob_db.append(probs)
+
+    return prob_db
 
 
 
@@ -51,6 +69,8 @@ def main():
     # print("number", num_seq)
     # print("length", seq_length)
     # print(output_file)
+
+
 
 if __name__ == '__main__':
     main()
