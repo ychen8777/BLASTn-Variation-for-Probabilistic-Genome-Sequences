@@ -18,6 +18,9 @@ import argparse
 from pathlib import Path
 
 def create_prob(sequence_db, probability, nucleotides):
+    ''' returns a list with probability of each nucleotide at each postion as
+    a dictionary
+    '''
     prob_db = []
 
     for i in range(len(sequence_db)):
@@ -34,7 +37,20 @@ def create_prob(sequence_db, probability, nucleotides):
 
     return prob_db
 
+def choose_nuc(nuc_prob):
+    ''' returns a randomly chosen nucleotide based on the probability distribution
+    '''
+    nucs = []
+    probs = []
+    for nuc, prob in nuc_prob.items():
+        nucs.append(nuc)
+        probs.append(prob)
 
+    #print(nuc_prob)
+    #print(nucs)
+    #print(probs)
+
+    return random.choices(nucs, weights=probs, k=1)[0]
 
 
 
@@ -79,7 +95,8 @@ def main():
     nucleotides = set(list(sequence_db))
     prob_db = create_prob(sequence_db, probability, nucleotides)
 
-    print(len(sequence_db), len(prob_db))    
+    #print(len(sequence_db), len(prob_db))
+
 
 
 if __name__ == '__main__':
