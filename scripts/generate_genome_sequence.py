@@ -52,7 +52,18 @@ def choose_nuc(nuc_prob):
 
     return random.choices(nucs, weights=probs, k=1)[0]
 
+def generate_query_sequence(start, length, prob_db):
+    ''' returns sequence generated based on probability in prob_db starting from
+    start
+    '''
+    seq = ""
+    pos = start
 
+    for i in range(length):
+        seq += choose_nuc(prob_db[pos+i])
+
+    return seq
+    #return (start, seq)
 
 def main():
 
@@ -86,10 +97,11 @@ def main():
     # print("length", seq_length)
     # print(output_file)
 
-    with open(fasta_file) as f_file:
+    # build sequence and probability db
+    with open(fasta_file, "r") as f_file:
         sequence_db = f_file.readline()
 
-    with open(prob_file) as p_file:
+    with open(prob_file, "r") as p_file:
         probability = p_file.readline().split()
 
     nucleotides = set(list(sequence_db))
@@ -97,7 +109,17 @@ def main():
 
     #print(len(sequence_db), len(prob_db))
 
+    # generate sequence and write to file
+    db_length = len(sequence_db)
+    with open(output_file, 'w') as o_file:
+        for i in range(num_seq):
+            start_pos = random.randint(0, db_length - seq_length - 1)
+            seq = generate_query_sequence(start_pos, seq_length, prob_db)
+            each_line = str(start_pos) + "," + seq + "\n"
+            #print(each_line)
+            o_file.write(each_line)
 
+    print(f"Generated {num_seq} sequences of length {seq_length} in {output_file}")
 
 if __name__ == '__main__':
     main()
