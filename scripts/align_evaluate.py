@@ -3,6 +3,7 @@ This script performs local alignment, examines if the start position of the alig
 matches the record from generation, and saves results to file
 
 '''
+import re
 import argparse
 from pathlib import Path
 from collections import Counter
@@ -105,8 +106,96 @@ def search_hit(query, sequence_db, match, mismatch, threshold, prob_db=None):
                 result[start] = alignment_score
 
             start += 1
-        
+
     return result
+
+def extension(query_seq, kmer, sequence_db, start, score, match, mismatch, cutoff, prob_db=None):
+    ''' returns the start and end positions in sequence_db, and score after
+    extension step
+    '''
+
+    seq_length = len(query_seq)
+    db_length = len(sequence_db)
+    pos_in_query = [m.start() for m in re.finditer(f"(?={kmer})", query_seq)]
+    #print(pos_in_query)
+    
+    #start_results = Counter()
+    #end_results = Counter()
+
+    results = Counter()
+
+    for pos in pos_in_query:
+
+        # extend left
+
+        high_score = score
+        cur_score = score
+        high_start = start
+        db_pos = start    # pos in database sequence
+        query_pos = pos   # pos in query_seq
+
+        while db_pos > 0 and query_pos > 0 and cur_score - high_score >= cutoff:
+            db_pos -= 1
+            query_pos -= 1
+
+            query_nuc = query_seq[query_pos]
+
+            if prob_db == None:
+                # non-probabilistic
+                if query_nuc == sequence_db[db_pos]:
+                    incre_score = match
+                else:
+                    incre_score = mismatch
+
+            else:
+                # probabilistic
+                incre_score = compute_prob_score(query_nuc, match, mismatch, db_pos, prob_db)
+
+            cur_score += incre_score
+
+            if cur_score > high_score:
+                high_score = cur_score
+                high_start = db_pos
+
+            #print("left", cur_score, incre_score, high_score, high_start, query_pos)
+
+        # extend right
+
+        db_pos = start + len(kmer) - 1
+        query_pos = pos + len(kmer) - 1
+        high_end = db_pos
+
+        while db_pos < db_length - 1 and query_pos < seq_length - 1 and cur_score - high_score >= cutoff:
+            db_pos += 1
+            query_pos += 1
+
+            query_nuc = query_seq[query_pos]
+
+            if prob_db == None:
+                # non-probabilistic
+                if query_nuc == sequence_db[db_pos]:
+                    incre_score = match
+                else:
+                    incre_score = mismatch
+
+            else:
+                # probabilistic
+                incre_score = compute_prob_score(query_nuc, match, mismatch, db_pos, prob_db)
+
+            cur_score += incre_score
+
+            if cur_score > high_score:
+                high_score = cur_score
+                high_end = db_pos
+
+            #print("right", cur_score, incre_score, high_score, high_end, query_pos)
+
+        results[(high_start, high_end)] = high_score
+        #print("result", high_start, high_end-high_start+1, high_score)
+
+    #return start_results.most_common()
+    #return (high_start, length, high_score)
+    return results
 
 
 def main():
