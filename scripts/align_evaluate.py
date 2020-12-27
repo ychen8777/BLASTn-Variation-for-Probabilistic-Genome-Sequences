@@ -5,6 +5,7 @@ matches the record from generation, and saves results to file
 '''
 import argparse
 from pathlib import Path
+from collections import Counter
 
 def read_seq(input_file):
     ''' reads start position and seqence from input_file and returns a list of
@@ -68,6 +69,44 @@ def compute_fixed_length_score(seq1, seq2, match, mismatch, start=None, prob_db=
 
     #print(cur_pos)
     return score
+
+def search_hit(query, sequence_db, match, mismatch, threshold, prob_db=None):
+    ''' returns a Counter with start position of hit and corresponding
+    alignment score
+    '''
+    len_query = len(query)
+    len_seq_db = len(sequence_db)
+    start = 0
+
+    result = Counter()
+
+    if prob_db == None:
+        # do not consider probability
+        while start+len_query <= len_seq_db:
+            sub_sequence = sequence_db[start:start+len_query]
+            #print(sub_sequence)
+
+            alignment_score = compute_fixed_length_score(query, sub_sequence, match, mismatch)
+            if alignment_score >= threshold:
+                #result.append((start, alignment_score))
+                result[start] = alignment_score
+
+            #print(query, sub_sequence, alignment_score)
+            start += 1
+
+    else:
+        # probabilistic sequence
+        while start+len_query <= len_seq_db:
+
+            alignment_score = compute_fixed_length_score(query, "", match, mismatch, start, prob_db)
+
+            if alignment_score >= threshold:
+                #result.append((start, alignment_score))
+                result[start] = alignment_score
+
+            start += 1
+        
+    return result
 
 
 def main():
