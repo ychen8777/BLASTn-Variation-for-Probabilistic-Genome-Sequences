@@ -258,6 +258,70 @@ def count_correctness(true_start_pos, seq_length, local_alignments, choices):
 
     return total_correct, total_start_correct, total_end_correct
 
+
+def evaluate(query_seq_list, seq_length, word_size, sequence_db, match, mismatch, \
+threshold, extension_cutoff, choices, output, prob_db=None):
+    ''' print out performance stats given test data
+    '''
+    total_CPU_time = 0
+    total_correct = [0] * choices
+    total_start_correct = [0] * choices
+    total_end_correct = [0] * choices
+    num_seq = len(query_seq_list)
+
+    # write sequence information
+    with open(output, 'w') as o_file:
+        first_line = f"sequence length: {seq_length}, word size: {word_size}\n"
+        second_line = f"match: {match}, mismatch: {mismatch}\n"
+        third_line = f"hit threshold: {threshold}, cutoff for extention: {extension_cutoff}\n"
+        o_file.write(first_line)
+        o_file.write(second_line)
+        o_file.write(third_line)
+        o_file.write(\n)
+
+    count_indicator = 1
+    # examine correctness for each local alignment of query sequence
+    for true_start_pos, query_seq in query_seq_list:
+        start_time = time.time()
+        alignments = find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, threshold, extension_cutoff, prob_db)
+        alignments = alignments.most_common(choices)
+        total_CPU_time += time.time() - start_time
+
+        correctness = count_correctness(true_start_pos, seq_length, alignments, choices)
+
+        for i in range(len(total_correct)):
+            total_correct[i] += correctness[0][i]
+            total_start_correct[i] += correctness[1][i]
+            total_end_correct[i] += correctness[2][i]
+
+        if count_indicator % 20 == 0:
+             print("partial results:" , count_indicator)
+             print("total CPU time:", total_CPU_time)
+
+             with open(output, 'a') as o_file:
+                 o_file.write(f"partial results: {count_indicator}/{num_seq}\n")
+                 o_file.write(f"both correct (top 1 choice): {total_correct[0]}\n")
+                 o_file.write(f"start correct (top 1 choice): {total_start_correct[0]}\n")
+                 o_file.write(f"end correct (top 1 choice): {total_end_correct[0]}\n")
+                 o_file.write("###################################################\n")
+
+        #     for i in range(len(total_correct)):
+        #         print(f"both correct (top {i+1} choices): ", total_correct[i])
+        #         print(f"start correct (top {i+1} choices): ", total_start_correct[i])
+        #         print(f"end correct (top {i+1} choices): ", total_end_correct[i])
+        #     print("=========")
+        #
+        # count_indicator += 1
+
+    with open(output, 'a') as o_file:
+        o_file.write(f"average search time:  {round(total_CPU_time / num_seq, 3)} seconds\n")
+        o_file.write(f"both correct (top 1 choice): {total_correct[0]}\n")
+        o_file.write(f"start correct (top 1 choice): {total_start_correct[0]}\n")
+        o_file.write(f"end correct (top 1 choice): {total_end_correct[0]}\n")
+        o_file.write(f"both correct (top 2 choices): {total_correct[1]}\n")
+        o_file.write(f"both correct (top 3 choices): {total_correct[2]}\n")
+
+
 def main():
 
     parser = argparse.ArgumentParser()
