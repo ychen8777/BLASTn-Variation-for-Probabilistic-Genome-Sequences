@@ -44,6 +44,32 @@ def compute_prob_score(query_nuc, match, mismatch, pos, prob_db):
 
     return score
 
+def compute_fixed_length_score(seq1, seq2, match, mismatch, start=None, prob_db=None):
+    ''' return alignment score for seq1 and seq2
+    non-probabilistic score is returned if start and prob_db are not provided.
+    '''
+
+    score = 0
+
+    if start == None or prob_db == None:
+        # treat as non-probalistic
+        for i in range(len(seq1)):
+            if seq1[i] == seq2[i]:
+                score += match
+            else:
+                score += mismatch
+
+        return score
+
+    cur_pos = start
+    for nuc in seq1:
+        score += compute_prob_score(nuc, match, mismatch, cur_pos, prob_db)
+        cur_pos += 1
+
+    #print(cur_pos)
+    return score
+
+
 def main():
 
     parser = argparse.ArgumentParser()
