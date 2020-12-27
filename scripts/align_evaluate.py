@@ -118,7 +118,7 @@ def extension(query_seq, kmer, sequence_db, start, score, match, mismatch, cutof
     db_length = len(sequence_db)
     pos_in_query = [m.start() for m in re.finditer(f"(?={kmer})", query_seq)]
     #print(pos_in_query)
-    
+
     #start_results = Counter()
     #end_results = Counter()
 
@@ -196,6 +196,33 @@ def extension(query_seq, kmer, sequence_db, start, score, match, mismatch, cutof
     #return start_results.most_common()
     #return (high_start, length, high_score)
     return results
+
+def find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, threshold, extension_cutoff, prob_db=None):
+    ''' return the start and end positions of local alignments in sequence_db
+    '''
+
+    # create list of kmers
+    kmer_list = create_kmer(query_seq, word_size)
+
+    # search for hits
+    kmer_index = {}
+    for word in kmer_list:
+        kmer_index[word] = search_hit(word, sequence_db, match, mismatch, threshold, prob_db)
+    #print(kmer_index)
+
+    # extend hits
+    local_alignments = Counter()
+    for word in kmer_index:
+        for db_start, score in kmer_index[word].items():
+            extensions = extension(query_seq, word, sequence_db, db_start, score, match, mismatch, extension_cutoff, prob_db)
+            for start_end, alignment_score in extensions.items():
+                if start_end in local_alignments:
+                    if alignment_score > local_alignments[start_end]:
+                        local_alignments[start_end] = alignment_score
+                else:
+                    local_alignments[start_end] = alignment_score
+
+    return local_alignments
 
 
 def main():
