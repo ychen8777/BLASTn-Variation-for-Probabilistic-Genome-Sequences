@@ -23,6 +23,17 @@ def read_seq(input_file):
 
     return test_data
 
+def create_kmer(seq, k):
+    '''return a list of kmer from chars in seq
+    '''
+    start = 0
+    kmer_list = []
+
+    while start+k-1 <= len(seq) - 1:
+        kmer_list.append(seq[start:start+k])
+        start += 1
+
+    return kmer_list
 
 def main():
 
