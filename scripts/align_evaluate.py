@@ -224,6 +224,39 @@ def find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, thr
 
     return local_alignments
 
+def count_correctness(true_start_pos, seq_length, local_alignments, choices):
+    ''' return increment for total_correct, total_start_correct, and
+    total_end_correct numbers
+    '''
+
+    #choices = len(local_alignments)
+
+    total_correct = [0] * choices
+    total_start_correct = [0] * choices
+    total_end_correct = [0] * choices
+
+    true_end_pos = true_start_pos + seq_length - 1
+    for i in range(len(local_alignments)):
+        pre_start_pos = local_alignments[i][0][0]
+        pre_end_pos = local_alignments[i][0][1]
+
+        if pre_start_pos == true_start_pos and pre_end_pos == true_end_pos:
+            for j in range(i, choices):
+                total_correct[j] = 1
+
+        if pre_start_pos == true_start_pos and pre_end_pos != true_end_pos:
+            for j in range(i, choices):
+                total_start_correct[j] = 1
+
+        if pre_start_pos != true_start_pos and pre_end_pos == true_end_pos:
+            for j in range(i, choices):
+                total_end_correct[j] = 1
+    for i in range(len(total_correct)):
+        if total_correct[i] == 1:
+            total_start_correct[i] = 0
+            total_end_correct[i] = 0
+
+    return total_correct, total_start_correct, total_end_correct
 
 def main():
 
