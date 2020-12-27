@@ -35,6 +35,15 @@ def create_kmer(seq, k):
 
     return kmer_list
 
+def compute_prob_score(query_nuc, match, mismatch, pos, prob_db):
+    ''' return score of single position given query_nuc and its postion
+    '''
+
+    match_prob = prob_db[pos][query_nuc]
+    score = match_prob * match + (1 - match_prob) * mismatch
+
+    return score
+
 def main():
 
     parser = argparse.ArgumentParser()
