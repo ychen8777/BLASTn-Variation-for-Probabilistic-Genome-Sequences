@@ -4,9 +4,11 @@ matches the record from generation, and saves results to file
 
 '''
 import re
+import time
 import argparse
 from pathlib import Path
 from collections import Counter
+from generate_genome_sequence import create_prob
 
 def read_seq(input_file):
     ''' reads start position and seqence from input_file and returns a list of
@@ -277,11 +279,12 @@ threshold, extension_cutoff, choices, output, prob_db=None):
         o_file.write(first_line)
         o_file.write(second_line)
         o_file.write(third_line)
-        o_file.write(\n)
+        o_file.write("\n")
 
     count_indicator = 1
     # examine correctness for each local alignment of query sequence
     for true_start_pos, query_seq in query_seq_list:
+
         start_time = time.time()
         alignments = find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, threshold, extension_cutoff, prob_db)
         alignments = alignments.most_common(choices)
@@ -305,6 +308,7 @@ threshold, extension_cutoff, choices, output, prob_db=None):
                  o_file.write(f"end correct (top 1 choice): {total_end_correct[0]}\n")
                  o_file.write("###################################################\n")
 
+        count_indicator += 1
         #     for i in range(len(total_correct)):
         #         print(f"both correct (top {i+1} choices): ", total_correct[i])
         #         print(f"start correct (top {i+1} choices): ", total_start_correct[i])
@@ -324,22 +328,50 @@ threshold, extension_cutoff, choices, output, prob_db=None):
 
 def main():
 
+    # parameters for BLAST
+    #num_seq = 100
+    #seq_length = 500
+    word_size = 3
+    match = 5
+    mismatch = -4
+    threshold = 30
+    extension_cutoff = -10
+    choices = 3
+
     parser = argparse.ArgumentParser()
     parser.add_argument("seq_file", help="path to file containing start position and sequence")
+    parser.add_argument("fasta_file", help="path to FASTA file")
+    parser.add_argument("prob_file", help="path to file for probability of confidence")
     parser.add_argument("output_file", help="file to save results")
-    parser.add_argument("-c", "--num_choices", help="number of top choices to consider")
+    #parser.add_argument("-c", "--num_choices", help="number of top choices to consider", required=True)
 
     args = parser.parse_args()
     seq_file = Path(args.seq_file)
+    fasta_file = Path(args.fasta_file)
+    prob_file = Path(args.prob_file)
     output_file = Path(args.output_file)
-    num_choices = int(args.num_choices)
+    #num_choices = int(args.num_choices)
 
     #print(seq_file)
     #print(output_file)
     #print(num_choices)
 
     test_data = read_seq(seq_file)
+    seq_length = len(test_data[0][1])
     #print(test_data)
+    # build sequence and probability db
+    with open(fasta_file, "r") as f_file:
+        sequence_db = f_file.readline()
+
+    with open(prob_file, "r") as p_file:
+        probability = p_file.readline().split()
+
+    nucleotides = set(list(sequence_db))
+    prob_db = create_prob(sequence_db, probability, nucleotides)
+
+    # perform BLAST
+    evaluate(test_data, seq_length, word_size, sequence_db, match, mismatch, \
+    threshold, extension_cutoff, choices, output_file, prob_db)
 
 if __name__ == '__main__':
     main()
