@@ -331,10 +331,10 @@ def main():
     # parameters for BLAST
     #num_seq = 100
     #seq_length = 500
-    word_size = 12
+    #word_size = 12
+    #threshold = 40
     match = 5
     mismatch = -4
-    threshold = 40
     extension_cutoff = -15
     choices = 3
 
@@ -343,9 +343,13 @@ def main():
     parser.add_argument("fasta_file", help="path to FASTA file")
     parser.add_argument("prob_file", help="path to file for probability of confidence")
     parser.add_argument("output_file", help="file to save results")
+    parser.add_argument("-w", "--word_size", help="size of word used when locating hits", required=True)
+    parser.add_argument("-t", "--threshold", help="threshold for determining hit", required=True)
     #parser.add_argument("-c", "--num_choices", help="number of top choices to consider", required=True)
 
     args = parser.parse_args()
+    word_size = int(args.word_size)
+    threshold = int(args.threshold)
     seq_file = Path(args.seq_file)
     fasta_file = Path(args.fasta_file)
     prob_file = Path(args.prob_file)
@@ -372,6 +376,9 @@ def main():
     # perform BLAST
     evaluate(test_data, seq_length, word_size, sequence_db, match, mismatch, \
     threshold, extension_cutoff, choices, output_file, prob_db)
+
+    # indicate finish of the evaluation
+    print(f"Alignment finished. Evaluation results saved to {output_file}")
 
 if __name__ == '__main__':
     main()

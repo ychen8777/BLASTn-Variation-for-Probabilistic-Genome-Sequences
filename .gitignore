@@ -7,3 +7,5 @@ data/25_seq_60.txt
 data/results15_7.txt
 data/results25_60.txt
 scripts/__pycache__/generate_genome_sequence.cpython-38.pyc
+data/5_seq_50.csv
+data/results5_50.txt
