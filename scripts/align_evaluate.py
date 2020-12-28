@@ -21,7 +21,7 @@ def read_seq(input_file):
         each_line = in_file.readline()
         while len(each_line) > 0:
             pos_seq = each_line.split(",")
-            test_data.append((pos_seq[0], pos_seq[1][:-1]))
+            test_data.append((int(pos_seq[0]), pos_seq[1][:-1]))
 
             each_line = in_file.readline()
 
@@ -331,11 +331,11 @@ def main():
     # parameters for BLAST
     #num_seq = 100
     #seq_length = 500
-    word_size = 3
+    word_size = 12
     match = 5
     mismatch = -4
-    threshold = 30
-    extension_cutoff = -10
+    threshold = 40
+    extension_cutoff = -15
     choices = 3
 
     parser = argparse.ArgumentParser()

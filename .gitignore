@@ -3,3 +3,7 @@ data/chr22.maf.ancestors.42000000.complete.boreo.conf
 data/chr22.maf.ancestors.42000000.complete.boreo.fa
 data/100_seq.txt
 data/seq_15_7.csv
+data/25_seq_60.txt
+data/results15_7.txt
+data/results25_60.txt
+scripts/__pycache__/generate_genome_sequence.cpython-38.pyc
