@@ -297,7 +297,7 @@ threshold, extension_cutoff, choices, output, prob_db=None):
             total_start_correct[i] += correctness[1][i]
             total_end_correct[i] += correctness[2][i]
 
-        if count_indicator % 20 == 0:
+        if count_indicator % 10 == 0:
              print("partial results:" , count_indicator)
              print("total CPU time:", total_CPU_time)
 
@@ -318,6 +318,7 @@ threshold, extension_cutoff, choices, output, prob_db=None):
         # count_indicator += 1
 
     with open(output, 'a') as o_file:
+        o_file.write(f"number of sequences searched: {count_indicator}\n")
         o_file.write(f"average search time:  {round(total_CPU_time / num_seq, 3)} seconds\n")
         o_file.write(f"both correct (top 1 choice): {total_correct[0]}\n")
         o_file.write(f"start correct (top 1 choice): {total_start_correct[0]}\n")

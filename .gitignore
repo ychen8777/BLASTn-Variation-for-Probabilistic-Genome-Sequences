@@ -9,3 +9,10 @@ data/results25_60.txt
 scripts/__pycache__/generate_genome_sequence.cpython-38.pyc
 data/5_seq_50.csv
 data/results5_50.txt
+data/100_seq_100.csv
+data/50_seq_100_p1.csv
+data/50_seq_100_p2.csv
+data/results/results100_31_105_p1.txt
+data/results/results100_31_115.txt
+data/results/results100_31_125_p2.txt
+data/results/results100_31_125_void.txt
