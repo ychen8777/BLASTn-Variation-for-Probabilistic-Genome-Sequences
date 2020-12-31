@@ -318,7 +318,7 @@ threshold, extension_cutoff, choices, output, prob_db=None):
         # count_indicator += 1
 
     with open(output, 'a') as o_file:
-        o_file.write(f"number of sequences searched: {count_indicator}\n")
+        o_file.write(f"number of sequences searched: {num_seq}\n")
         o_file.write(f"average search time:  {round(total_CPU_time / num_seq, 3)} seconds\n")
         o_file.write(f"both correct (top 1 choice): {total_correct[0]}\n")
         o_file.write(f"start correct (top 1 choice): {total_start_correct[0]}\n")
