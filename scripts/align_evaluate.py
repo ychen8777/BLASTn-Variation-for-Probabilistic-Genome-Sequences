@@ -80,6 +80,7 @@ def search_hit(query, sequence_db, match, mismatch, threshold, prob_db=None):
     len_query = len(query)
     len_seq_db = len(sequence_db)
     start = 0
+    num_hits = 0
 
     result = Counter()
 
@@ -93,6 +94,7 @@ def search_hit(query, sequence_db, match, mismatch, threshold, prob_db=None):
             if alignment_score >= threshold:
                 #result.append((start, alignment_score))
                 result[start] = alignment_score
+                num_hits += 1
 
             #print(query, sub_sequence, alignment_score)
             start += 1
@@ -106,10 +108,11 @@ def search_hit(query, sequence_db, match, mismatch, threshold, prob_db=None):
             if alignment_score >= threshold:
                 #result.append((start, alignment_score))
                 result[start] = alignment_score
+                num_hits += 1
 
             start += 1
 
-    return result
+    return result, num_hits
 
 def extension(query_seq, kmer, sequence_db, start, score, match, mismatch, cutoff, prob_db=None):
     ''' returns the start and end positions in sequence_db, and score after
@@ -203,13 +206,18 @@ def find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, thr
     ''' return the start and end positions of local alignments in sequence_db
     '''
 
+    total_hits = 0
+
     # create list of kmers
     kmer_list = create_kmer(query_seq, word_size)
 
     # search for hits
     kmer_index = {}
     for word in kmer_list:
-        kmer_index[word] = search_hit(word, sequence_db, match, mismatch, threshold, prob_db)
+        #kmer_index[word] = search_hit(word, sequence_db, match, mismatch, threshold, prob_db)
+        hits_result = search_hit(word, sequence_db, match, mismatch, threshold, prob_db)
+        kmer_index[word] = hits_result[0]
+        total_hits += hits_result[1]
     #print(kmer_index)
 
     # extend hits
@@ -224,7 +232,7 @@ def find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, thr
                 else:
                     local_alignments[start_end] = alignment_score
 
-    return local_alignments
+    return local_alignments, total_hits
 
 def count_correctness(true_start_pos, seq_length, local_alignments, choices):
     ''' return increment for total_correct, total_start_correct, and
@@ -270,6 +278,7 @@ threshold, extension_cutoff, choices, output, prob_db=None):
     total_start_correct = [0] * choices
     total_end_correct = [0] * choices
     num_seq = len(query_seq_list)
+    total_hits = 0
 
     # write sequence information
     with open(output, 'w') as o_file:
@@ -286,8 +295,9 @@ threshold, extension_cutoff, choices, output, prob_db=None):
     for true_start_pos, query_seq in query_seq_list:
 
         start_time = time.time()
-        alignments = find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, threshold, extension_cutoff, prob_db)
-        alignments = alignments.most_common(choices)
+        alignment_result = find_local_alignment(query_seq, word_size, sequence_db, match, mismatch, threshold, extension_cutoff, prob_db)
+        alignments = alignment_result[0].most_common(choices)
+        total_hits += alignment_result[1]
         total_CPU_time += time.time() - start_time
 
         correctness = count_correctness(true_start_pos, seq_length, alignments, choices)
@@ -320,6 +330,7 @@ threshold, extension_cutoff, choices, output, prob_db=None):
     with open(output, 'a') as o_file:
         o_file.write(f"number of sequences searched: {num_seq}\n")
         o_file.write(f"average search time:  {round(total_CPU_time / num_seq, 3)} seconds\n")
+        o_file.write(f"average hits:  {round(total_hits / num_seq)} hits\n")
         o_file.write(f"both correct (top 1 choice): {total_correct[0]}\n")
         o_file.write(f"start correct (top 1 choice): {total_start_correct[0]}\n")
         o_file.write(f"end correct (top 1 choice): {total_end_correct[0]}\n")
