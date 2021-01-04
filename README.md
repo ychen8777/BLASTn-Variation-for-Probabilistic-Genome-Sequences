@@ -9,3 +9,7 @@ Professor Mathieu Blanchette provided a portion of chr22 of the predicted BoreoE
 
 I generated query sequences of length 100 using this probabilistic genome sequence. For each query sequence, the script randomly selects a start position from the probabilistic genome sequence, and then proceeds to build the query sequence by adding a nucleotide from {“A”, “C”, “G”, “T”} chosen based on the probability of the corresponding position in the probabilistic genome sequence.
 
+## Method
+For each query sequence, our goal is to find the start and end positions from the database sequence. I used the top ranking positions following the BLAST algorithm with the below scoring scheme:
+For each nucleotide in query sequence, the incremental score is
+![Scoring Scheme](scoring_scheme.jpg)
