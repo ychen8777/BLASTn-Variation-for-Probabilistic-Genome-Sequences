@@ -13,3 +13,6 @@ I generated query sequences of length 100 using this probabilistic genome sequen
 For each query sequence, our goal is to find the start and end positions from the database sequence. I used the top ranking positions following the BLAST algorithm with the below scoring scheme:
 For each nucleotide in query sequence, the incremental score is
 ![Scoring Scheme](scoring_scheme.jpg)
+
+## Results
+![Results](results_length_100.jpg)
